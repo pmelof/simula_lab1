@@ -3,12 +3,14 @@ public class Individuo {
     PVector velocidad;
     PVector aceleracion;  
     Boolean enfermo;
+    int tipo_caminata; //0: caminar aleatorio ; 1: caminar alternativo
     color c;
     
-    Individuo()
+    Individuo(color c, boolean enfermo, int tipo_caminata)
     {
-        enfermo = false;
-        c = color(0,255,63);
+        this.enfermo = enfermo;
+        this.c = c;
+        this.tipo_caminata = tipo_caminata;
     }
       
     void mostrar()
@@ -24,23 +26,54 @@ public class Individuo {
         posicion = pos;
     }
     
-    void establecerVelocidad()
+    void establecerVelocidad(int s)
     {
-        PVector vel = new PVector(randomGaussian(), 0);  
-        velocidad = vel;
+        if(tipo_caminata == 0)
+        {
+            PVector vel = new PVector(randomGaussian(), 0);  
+            velocidad = vel;
+        }
+        
+        else
+        {
+            float vel_x =  s*cos(random(TWO_PI));
+            float vel_y =  s*sin(random(TWO_PI));
+            PVector vel = new PVector(vel_x, vel_y);  
+            velocidad = vel;
+        }
+
     }
+    
+    //No se utiliza aún
+    void establecerAceleracion() 
+    {
+        PVector acel = new PVector(0, 0);  
+        aceleracion = acel;
+    }
+    
     
     void caminar()
     {
-        posicion = posicion.add(velocidad);
+        posicion = posicion.add(velocidad); // (10, 25) + (-1, -1) -> (9, 24) -> (8, 23)
+        
         if(posicion.x > width)
         {
             posicion.x = 0;
         }
         
-        if(posicion.x < 0)
+        else if(posicion.x < 0)
         {
             posicion.x = width;
+        }
+        
+        else if(posicion.y > height)
+        {
+            posicion.y = 0;
+        }
+        
+        else if(posicion.y < 0)
+        {
+            posicion.y = height;
         }
     }
 }
