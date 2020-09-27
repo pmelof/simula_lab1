@@ -1,31 +1,55 @@
 ArrayList<Individuo> individuos = new ArrayList<Individuo>(); // Lista de individuos
-int cantidad_individuos = 300; // Cantidad de individuos
-float s = 0.3; // s es el factor que multiplica en x = x + s * cos(tetha) y y = y + s * sin(tetha)
-float p_enfermo = 0.1 ; // probabilidad de que un individuo esté enfermo 
-int tipo_caminata = 1; // 0: caminar aleatorio ; 1: caminar alternativo
+int cantidad_individuos = 10; // Cantidad de individuos
+float vel = 2; // velocidad individuos
+float p_enfermo = 0.3 ; // probabilidad de que un individuo esté enfermo 
+float p_mascarilla = 0.0;
+float p_transmision = 1;
+int radio = 8;
+float min_distancia = 2*radio;
+boolean colision = false;
+float distancia_social = 1.5 * min_distancia;
 
 //Se establecen las configuraciones iniciales, tales como creación de la grilla e inicialización de individuos.
 void setup() {
     size(1024, 1024);
-    for(int i=0; i<cantidad_individuos;i++)
+    for(int i=0; i < cantidad_individuos; i++)
     {
-        float r = random(0,1);
+        float r_enfermo = random(0,1);
+        float r_mascarilla = random(0,1);
+
         Individuo individuo;
         
-        if(p_enfermo >= r)
+        if(p_enfermo >= r_enfermo)
         {
-            color rojo = color(255,0,0);
-            individuo = new Individuo(rojo,true,tipo_caminata);
+            if(p_mascarilla >= r_mascarilla)
+            {
+                individuo = new Individuo(i,1, true);
+            }
+            
+            else
+            {
+                individuo = new Individuo(i,1, false);
+            }
         }
         
         else
         {
-            color verde = color(0,255,0);
-            individuo = new Individuo(verde,true,tipo_caminata);
+            if(p_mascarilla >= r_mascarilla)
+            {
+                individuo = new Individuo(i,0, true);
+            }
+            
+            else
+            {
+                individuo = new Individuo(i,0, false);
+            }          
         }
         individuo.establecerPosicion();
-        individuo.establecerVelocidad(s);
+        individuo.establecerVelocidad(vel);
         individuos.add(individuo);
+        
+        println(individuo.id, individuo.estado);
+        
     }
 }
 
@@ -34,6 +58,8 @@ void draw()
 {
     background(0);
     mostrarIndividuos();
+    chequearColision();
+    chequearDistanciaSocial();
 }
 
 // Función que recorre a todos los individuos para mostrarlos, establecer su velocidad y hacerlos caminar.
@@ -42,11 +68,34 @@ void mostrarIndividuos()
     for(int i=0; i<cantidad_individuos; i++)
     {
         //individuos.get(i).obtenerPosicion();
-        individuos.get(i).mostrar();
-        if(tipo_caminata == 1)
-        {
-            individuos.get(i).establecerVelocidad(s);
-        }
+        individuos.get(i).mostrar(radio);
         individuos.get(i).caminar();
     }
+}
+
+void chequearColision()
+{
+    for(int i=0; i<cantidad_individuos; i++)
+        {
+            if(colision)
+            {
+                individuos.get(i).chequearColision(individuos, min_distancia);
+            }
+        }     
+}
+
+void chequearDistanciaSocial()
+{
+    for(int i=0; i<cantidad_individuos; i++)
+    {
+        if(individuos.get(i).chequearDistancia(individuos, distancia_social) == true)
+        {
+            float r_transmision = random(0,1);
+            if(p_transmision >= r_transmision)
+            {
+                println("entreeeeeeeeeee");
+                individuos.get(i).enfermar();
+            }
+        }
+    }     
 }
